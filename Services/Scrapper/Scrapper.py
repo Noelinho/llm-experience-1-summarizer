@@ -1,7 +1,7 @@
 from bs4 import BeautifulSoup
 import requests
 
-from Models.Webpage import WebPage
+from Dtos.Webpage import Webpage
 
 headers = {
  "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
@@ -13,7 +13,7 @@ class Scrapper:
     def __init__(self):
         pass
 
-    def scrape(self, url: str) -> WebPage:
+    def scrape(self, url: str) -> Webpage:
         title = ""
         body = ""
 
@@ -26,7 +26,7 @@ class Scrapper:
 
         body = soup.body.get_text(separator="\n", strip=True)
 
-        return WebPage(url=url, title=title, content=body)
+        return Webpage(url=url, title=title, content=body)
 
 
 
