@@ -1,5 +1,6 @@
 from openai import OpenAI
 
+from Dtos.Webpage import Webpage
 from Services.Summarizer.BadKeyException import BadKeyException
 
 
@@ -10,17 +11,28 @@ class OpenAISUmmarizer:
         self.client = OpenAI(api_key=api_key)
 
 
-    def summarize(self, text: str, model: str = "gpt-3.5-turbo", max_tokens: int = 150) -> str:
+    def summarize(self, webpage: Webpage, model: str = "gpt-3.5-turbo", max_tokens: int = 150) -> str:
         response = self.client.chat.completions.create(
             model=model,
             messages=[
-                {"role": "system", "content": "You are a helpful assistant that summarizes text."},
-                {"role": "user", "content": text}
+                {"role": "system", "content": self.generateSystemPrompt()},
+                {"role": "user", "content": self.generatePrompt(webpage)}
             ],
             max_tokens=max_tokens
         )
-        return response.choices[0].message['content'].strip()
+        return response.choices[0].message.content.strip()
 
+    def generateSystemPrompt(self) -> str:
+        return "Eres un asistente que analiza el contenido de una página web y retorna un resumen del contenido, ignorando el texto que puede estar relacionado con la navegación. Responde con markdown."
+
+    def generatePrompt(self, webpage: Webpage) -> str:
+        user_prompt = f"Estás analizando una página web con el título {webpage.title}"
+        user_prompt += "\nEl contenido de la página es el siguiente; \
+        por favor, devuélveme un resumen (como mínimo de 100 palabras y máximo 200) con markdown. \
+        Si incluye noticias o anuncios, tenlas en cuenta para el resumen.\n\n"
+        user_prompt += webpage.content
+
+        return user_prompt
 
     def checkKey(self, api_key):
         if not api_key:
